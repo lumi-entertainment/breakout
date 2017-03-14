@@ -1,0 +1,15 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+body {
+  border: 0;
+  background-color: white;
+  text-align: center;
+  width: 100%;
+}
+/* make the canvas the size of the viewport */
+canvas {
+  border: 2px solid #ccc;
+  margin: 0 auto;
+}
