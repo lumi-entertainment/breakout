@@ -17,9 +17,10 @@ U.setLogLevel(U.LOG_LEVELS.DEBUG);
     var _dx = 5;
     var _dy = -5;
     var _ballRadius = 10;
-
-    var _interval;
-
+    var _running = false;
+    var _loading = true;
+    var _splashScreen = null;
+    var _assets = {};
 
     var paddleHeight = 10;
     var paddleWidth = 75;
@@ -124,7 +125,7 @@ U.setLogLevel(U.LOG_LEVELS.DEBUG);
         for (var c = 0; c < coins.length; c++) {
             if (coins[c].dropping) {
                 coins[c].y += _coindDY;
-                if(coins[c].y > 0){
+                if (coins[c].y > 0) {
                     _ctx.beginPath();
                     _ctx.arc(coins[c].x, coins[c].y, 5, 0, Math.PI * 2);
                     _ctx.fillStyle = "#DDBB00";
@@ -135,7 +136,7 @@ U.setLogLevel(U.LOG_LEVELS.DEBUG);
                 }
             }
         }
-        coins = coins.filter(function(c){
+        coins = coins.filter(function (c) {
             return c.dropping;
         });
     }
@@ -163,51 +164,125 @@ U.setLogLevel(U.LOG_LEVELS.DEBUG);
 
     function draw() {
         _ctx.clearRect(0, 0, _canvas.width, _canvas.height);
-        drawBricks();
-        drawBall();
-        drawPaddle();
-        drawScore();
-        drawLives();
-        collisionDetection();
-        drawCoins();
-        if (_x + _dx > _canvas.width - _ballRadius || _x + _dx < _ballRadius) {
-            _dx = -_dx;
-        }
-        if (_y + _dy < _ballRadius) {
-            _dy = -_dy;
-        }
-        else if (_y + _dy > _canvas.height - _ballRadius) {
-            if (_x > paddleX && _x < paddleX + paddleWidth) {
+        if (!_running) {
+            drawSplashScreen();
+        } else {
+            drawBricks();
+            drawBall();
+            drawPaddle();
+            drawScore();
+            drawLives();
+            collisionDetection();
+            drawCoins();
+            if (_x + _dx > _canvas.width - _ballRadius || _x + _dx < _ballRadius) {
+                _dx = -_dx;
+            }
+            if (_y + _dy < _ballRadius) {
                 _dy = -_dy;
             }
-            else {
-                lives--;
-                if (!lives) {
-                    U.log(U.LOG_LEVELS.INFO, "GAME OVER");
+            else if (_y + _dy > _canvas.height - _ballRadius) {
+                if (_x > paddleX && _x < paddleX + paddleWidth) {
+                    _dy = -_dy;
                 }
                 else {
-                    _x = _canvas.width / 2;
-                    _y = _canvas.height - 30;
-                    _dx = 5;
-                    _dy = -5;
-                    paddleX = (_canvas.width - paddleWidth) / 2;
+                    lives--;
+                    if (!lives) {
+                        U.log(U.LOG_LEVELS.INFO, "GAME OVER");
+                    }
+                    else {
+                        _x = _canvas.width / 2;
+                        _y = _canvas.height - 30;
+                        _dx = 5;
+                        _dy = -5;
+                        paddleX = (_canvas.width - paddleWidth) / 2;
+                    }
+
                 }
-
             }
-        }
 
-        if (rightPressed && paddleX < _canvas.width - paddleWidth) {
-            paddleX += 7;
-        }
-        else if (leftPressed && paddleX > 0) {
-            paddleX -= 7;
-        }
+            if (rightPressed && paddleX < _canvas.width - paddleWidth) {
+                paddleX += 7;
+            }
+            else if (leftPressed && paddleX > 0) {
+                paddleX -= 7;
+            }
 
-        _x += _dx;
-        _y += _dy;
+            _x += _dx;
+            _y += _dy;
+        }
         U.log(U.LOG_LEVELS.INFO, "Running...");
         window.requestAnimFrame(draw);
     }
 
-    draw();
+
+    function drawSplashScreen(perc, total) {
+        _ctx.clearRect(0, 0, _canvas.width, _canvas.height);
+        _ctx.drawImage(_splashScreen, 0, 0);
+        if(!_loading){
+            drawMenu();
+        } else {
+            drawLoadingBar(perc, total);
+        }
+    }
+
+    function drawMenu(){
+        // U.Graph.roundRect(_ctx, _canvas.width / 2 -100 , _canvas.height /2 + 50, 200, 100, 50);
+        _ctx.strokeStyle = "whitesmoke";
+        _ctx.stroke();
+        // _ctx.fillStyle = "whitesmoke";
+        // _ctx.fill();
+        // _ctx.closePath();
+    }
+
+    function drawLoadingBar(perc, total){
+        U.log(U.LOG_LEVELS.INFO, "drawLoadingBar..");
+    }
+
+    function loadResources(){
+        var assets= [];
+        var pendings = assets.length;
+
+        function checkPendings(){
+            if(pendings === 0){
+                _loading = false;
+            }
+        }
+
+        assets.forEach(function(a){
+            pendings++;
+            switch (a.type){
+                case "image":
+                    var img = new Image();
+                    U.log(U.LOG_LEVELS.INFO, "Loading image "+a.src+" ...");
+                    img.onload = function __imgLoader(){
+                        U.log(U.LOG_LEVELS.INFO, "Image "+a.src+" loaded!");
+                        pendings--;
+                        checkPendings();
+                    };
+                    img.src = a.src + new Date().toISOString();
+                    break;
+                default:
+                    pendings--;
+                    checkPendings();
+                    break;
+            }
+        });
+
+        checkPendings();
+    }
+
+    function start() {
+        // loads the splash screen!
+        U.log(U.LOG_LEVELS.INFO, "Loading splash screen..");
+        _splashScreen = new Image();
+        _splashScreen.onload = function () {
+            U.log(U.LOG_LEVELS.INFO, "Splash screen loaded!");
+            drawSplashScreen(0, 100);
+            loadResources();
+            draw();
+        };
+        _splashScreen.src = "assets/splash.png?" + new Date().toISOString();
+    }
+
+    start();
 })();

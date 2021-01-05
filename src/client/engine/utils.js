@@ -131,7 +131,27 @@ var U = (function (win) {
                 color = ("000000" + color).slice(-6); // pad with leading zeros
                 color = "#" + color;                  // prepend #
                 return color;
-            }
+            },
+            // roundRect: function roundRect(ctx, sx, sy, ex, ey, r) {
+            //     var r2d = Math.PI / 180;
+            //     if (( ex - sx ) - ( 2 * r ) < 0) {
+            //         r = ( ( ex - sx ) / 2 );
+            //     } //ensure that the radius isn't too large for x
+            //     if (( ey - sy ) - ( 2 * r ) < 0) {
+            //         r = ( ( ey - sy ) / 2 );
+            //     } //ensure that the radius isn't too large for y
+            //     ctx.beginPath();
+            //     ctx.moveTo(sx + r, sy);
+            //     ctx.lineTo(ex - r, sy);
+            //     ctx.arc(ex - r, sy + r, r, r2d * 270, r2d * 360, false);
+            //     ctx.lineTo(ex, ey - r);
+            //     ctx.arc(ex - r, ey - r, r, r2d * 0, r2d * 90, false);
+            //     ctx.lineTo(sx + r, ey);
+            //     ctx.arc(sx + r, ey - r, r, r2d * 90, r2d * 180, false);
+            //     ctx.lineTo(sx, sy + r);
+            //     ctx.arc(sx + r, sy + r, r, r2d * 180, r2d * 270, false);
+            //     ctx.closePath();
+            // }
         }
     }
 
